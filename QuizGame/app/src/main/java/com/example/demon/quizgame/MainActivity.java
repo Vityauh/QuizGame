@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.quizLists)
     ListView quizLists;
     private String urlSite;
+    private ArrayList <String> arrayListId = new ArrayList<>();
+    private String quizId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +45,9 @@ public class MainActivity extends AppCompatActivity {
         quizLists.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(MainActivity.class, ActualQuizTaken.class);
+                Intent i = new Intent(MainActivity.this, ActualQuizTaken.class);
+                i.putExtra("Quiz Title", arrayListId.get(position));
+                startActivity(i);
             }
         });
 
@@ -88,14 +94,14 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        ArrayList<String> arrayList = new ArrayList<>();
+        ArrayList<String> arrayListTitle = new ArrayList<>();
         JSONObject jsonObject = new JSONObject(data);
         JSONArray quizNameArray = jsonObject.getJSONArray("items");
         for (int i = 0; i<quizNameArray.length(); i++){
-            arrayList.add(0,quizNameArray.getJSONObject(i).getString("title"));
-
+            arrayListTitle.add(0,quizNameArray.getJSONObject(i).getString("title"));
+            arrayListId.add(0,quizNameArray.getJSONObject(i).getString("id"));
         }
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrayList);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrayListTitle);
         quizLists.setAdapter(arrayAdapter);
     }
 }
