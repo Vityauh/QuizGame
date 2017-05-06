@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -37,7 +36,7 @@ public class ActualQuizTaken extends AppCompatActivity {
     private ArrayList<String> arrayListQuestions = new ArrayList<>();
     private ArrayList<String> arrayListAnswers = new ArrayList<>();
     private ArrayList<Integer> arrayListOrder = new ArrayList<>();
-    private ArrayList<Integer> arrayListCorrect = new ArrayList<>();
+    private ArrayList<String> arrayListCorrect = new ArrayList<>();
     int whichQuestion;
     int whickAnswer = 0;
 
@@ -56,8 +55,8 @@ public class ActualQuizTaken extends AppCompatActivity {
     RadioButton radioButton4;
     @BindView(R.id.answersRadioGroup)
     RadioGroup answersRadioGroup;
-    @BindView(R.id.listViewTest)
-    ListView listViewTest;
+    @BindView(R.id.textViewTest)
+    TextView textViewTest;
 
 
 
@@ -133,7 +132,6 @@ public class ActualQuizTaken extends AppCompatActivity {
 
     private void getQuestionsJSON(String data)throws JSONException {
 
-        ArrayList<JSONObject> arrayList = new ArrayList<>();
         whichQuestion = -1;
         if (TextUtils.isEmpty(data)) {
             return;
@@ -143,12 +141,11 @@ public class ActualQuizTaken extends AppCompatActivity {
         JSONArray questionsArray = jsonObject.getJSONArray("questions");
         for (int i = 0 ; i <questionsArray.length();i++){
             JSONArray moreSpecificAnswers = new JSONArray(questionsArray.getJSONObject(i).getString("answers"));
-
             for (int j = 0 ; j <moreSpecificAnswers.length(); j++){
                 arrayListAnswers.add(moreSpecificAnswers.getJSONObject(j).getString("text"));
+
             }
         }
-
         for (int i = 0; i<questionsArray.length(); i++){
             arrayListQuestions.add(i,questionsArray.getJSONObject(i).getString("text"));
         }
@@ -156,6 +153,12 @@ public class ActualQuizTaken extends AppCompatActivity {
         for (int i = 0 ; i <questionsArray.length();i++){
             JSONArray moreSpecificAnswers = new JSONArray(questionsArray.getJSONObject(i).getString("answers"));
             for (int j = 0 ; j <moreSpecificAnswers.length(); j++){
+
+                if ((moreSpecificAnswers.getJSONObject(j).getString("isCorrect"))== null) {
+
+                } else {
+                    textViewTest.setText("correct : " + (j + 1));
+                }
                 arrayListOrder.add(moreSpecificAnswers.getJSONObject(j).getInt("order"));
             }
         }
