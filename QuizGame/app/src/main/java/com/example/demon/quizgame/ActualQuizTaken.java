@@ -7,15 +7,16 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class ActualQuizTaken extends AppCompatActivity {
     private ArrayList<String> arrayListQuestions = new ArrayList<>();
     private ArrayList<String> arrayListAnswers = new ArrayList<>();
     private ArrayList<Integer> arrayListOrder = new ArrayList<>();
+    private ArrayList<Integer> arrayListCorrect = new ArrayList<>();
     int whichQuestion;
     int whickAnswer = 0;
 
@@ -52,12 +54,12 @@ public class ActualQuizTaken extends AppCompatActivity {
     RadioButton radioButton3;
     @BindView(R.id.radioButton4)
     RadioButton radioButton4;
-    @BindView(R.id.textViewTest)
-    TextView textViewTest;
-    @BindView(R.id.textView2)
-    TextView textView2;
-    @BindView(R.id.textView3)
-    TextView textView3;
+    @BindView(R.id.answersRadioGroup)
+    RadioGroup answersRadioGroup;
+    @BindView(R.id.listViewTest)
+    ListView listViewTest;
+
+
 
 
 
@@ -131,66 +133,67 @@ public class ActualQuizTaken extends AppCompatActivity {
 
     private void getQuestionsJSON(String data)throws JSONException {
 
+        ArrayList<JSONObject> arrayList = new ArrayList<>();
         whichQuestion = -1;
         if (TextUtils.isEmpty(data)) {
             return;
         }
 
         JSONObject jsonObject = new JSONObject(data);
-        JSONArray quizQuestionNameArray = jsonObject.getJSONArray("questions");
-        JSONArray answersArray = jsonObject.getJSONArray("questions");
-        for (int i = 0 ; i <answersArray.length();i++){
-            JSONArray moreSpecificAnswers = new JSONArray(answersArray.getJSONObject(i).getString("answers"));
+        JSONArray questionsArray = jsonObject.getJSONArray("questions");
+        for (int i = 0 ; i <questionsArray.length();i++){
+            JSONArray moreSpecificAnswers = new JSONArray(questionsArray.getJSONObject(i).getString("answers"));
+
             for (int j = 0 ; j <moreSpecificAnswers.length(); j++){
                 arrayListAnswers.add(moreSpecificAnswers.getJSONObject(j).getString("text"));
             }
         }
 
-
-        for (int i = 0; i<quizQuestionNameArray.length(); i++){
-            arrayListQuestions.add(i,quizQuestionNameArray.getJSONObject(i).getString("text"));
+        for (int i = 0; i<questionsArray.length(); i++){
+            arrayListQuestions.add(i,questionsArray.getJSONObject(i).getString("text"));
         }
-        textViewTest.setText(arrayListAnswers.size()+ " ");
 
-        for (int i = 0 ; i <answersArray.length();i++){
-            JSONArray moreSpecificAnswers = new JSONArray(answersArray.getJSONObject(i).getString("answers"));
+        for (int i = 0 ; i <questionsArray.length();i++){
+            JSONArray moreSpecificAnswers = new JSONArray(questionsArray.getJSONObject(i).getString("answers"));
             for (int j = 0 ; j <moreSpecificAnswers.length(); j++){
                 arrayListOrder.add(moreSpecificAnswers.getJSONObject(j).getInt("order"));
             }
         }
 
-
-
-
-
-
         beginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 beginButton.setText("Next question!");
+                answersRadioGroup.clearCheck();
 
                 if (whichQuestion<arrayListQuestions.size()-1) {
                     whichQuestion++;
                     questionTextView.setText(arrayListQuestions.get(whichQuestion));
                     what :
                     if (whickAnswer<=arrayListOrder.size()) {
+                        radioButton1.setVisibility(View.VISIBLE);
+                        radioButton2.setVisibility(View.VISIBLE);
+                        radioButton3.setVisibility(View.INVISIBLE);
+                        radioButton4.setVisibility(View.INVISIBLE);
                         radioButton1.setText(arrayListAnswers.get(whickAnswer));
                         whickAnswer++;
                         radioButton2.setText(arrayListAnswers.get(whickAnswer));
-                        if (whickAnswer == arrayListOrder.size()-1){
+                        whickAnswer++;
+                        if (whickAnswer == arrayListOrder.size()){
                             break what;
                         }
-                        whickAnswer++;
                         if (arrayListOrder.get(whickAnswer) == 3 ) {
                             radioButton3.setVisibility(View.VISIBLE);
-                            radioButton4.setVisibility(View.VISIBLE);
                             radioButton3.setText(arrayListAnswers.get(whickAnswer));
                             whickAnswer++;
+                            if (whickAnswer == arrayListOrder.size()){
+                                break what;
+                            }
+                        }
+                        if (arrayListOrder.get(whickAnswer) == 4 ) {
+                            radioButton4.setVisibility(View.VISIBLE);
                             radioButton4.setText(arrayListAnswers.get(whickAnswer));
                             whickAnswer++;
-                        } else if (arrayListOrder.get(whickAnswer) ==1){
-                            radioButton3.setVisibility(View.INVISIBLE);
-                            radioButton4.setVisibility(View.INVISIBLE);
                         }
                     }
                 } else {
@@ -199,10 +202,7 @@ public class ActualQuizTaken extends AppCompatActivity {
                     radioButton2.setVisibility(View.INVISIBLE);
                     radioButton3.setVisibility(View.INVISIBLE);
                     radioButton4.setVisibility(View.INVISIBLE);
-
                 }
-
-
             }
         });
     }
